@@ -69,7 +69,7 @@ KyoUploader/
 
 ## License
 
-Project ini dilisensikan di bawah [MIT License](LICENSE).
+Project ini dilisensikan di bawah [MIT License](https://github.com/YudhaUNSP/KyoUploader/blob/main/LICENSE.txt).
 
 ## Contributing
 
