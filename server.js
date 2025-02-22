@@ -2,7 +2,6 @@ const express = require('express');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
-const crypto  = require('crypto');
 const os      = require('os');
 const checkDiskSpace = require('check-disk-space').default;
 
@@ -26,88 +25,147 @@ const storage = multer.diskStorage({
     cb(null, newName);
   }
 });
-const upload = multer({ storage });
+
+// Batasi ukuran file hingga 50 MB
+const upload = multer({ 
+  storage,
+  limits: { fileSize: 50 * 1024 * 1024 } // 50 MB
+});
+
 app.use(express.static('public'));
 app.use('/file', express.static('file'));
 
-app.post('/upload', upload.single('file'), (req, res) => {
-  if (!req.file) {
-    return res.status(400).send('File tidak ada.');
-  }
-  
-  const fileUrl = `${req.protocol}://${req.get('host')}/file/${req.file.filename}`;
-  res.send(`
-    <!DOCTYPE html>
-    <html lang="id">
-    <head>
-      <meta charset="UTF-8">
-      <title>Upload Sukses</title>
-      <style>
-        /* Reset dasar */
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        
-        /* Styling body */
-        body {
-          background-color: #f5f7fa;
-          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          min-height: 100vh;
-        }
-        
-        /* Container utama */
-        .container {
-          background-color: #fff;
-          max-width: 600px;
-          width: 100%;
-          margin: 20px;
-          padding: 30px;
-          border-radius: 8px;
-          box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          text-align: center;
-        }
-        
-        h1 {
-          font-size: 24px;
-          margin-bottom: 20px;
-          color: #333;
-        }
-        
-        p {
-          margin-bottom: 20px;
-          color: #555;
-          line-height: 1.6;
-        }
-        
-        a {
-          color: #007BFF;
-          text-decoration: none;
-          font-weight: bold;
-        }
-        
-        a:hover {
-          text-decoration: underline;
-        }
-        
-        /* Untuk memastikan link file tidak terlalu panjang */
-        .file-link {
-          word-wrap: break-word;
-        }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <h1>Upload Sukses</h1>
-        <p>File berhasil diupload.</p>
-        <p class="file-link">
-          Link: <a href="${fileUrl}" target="_blank">${fileUrl}</a>
-        </p>
-        <p><a href="/">Kembali ke Uploader</a></p>
-      </div>
-    </body>
-    </html>
-  `);
+app.post('/upload', (req, res) => {
+  upload.single('file')(req, res, (err) => {
+    if (err instanceof multer.MulterError) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.send(`
+          <!DOCTYPE html>
+          <html lang="id">
+          <head>
+            <meta charset="UTF-8">
+            <title>Error Upload</title>
+            <script>
+              alert("Ukuran file melebihi batas 50MB.");
+              window.location.href = "/";
+            </script>
+          </head>
+          <body></body>
+          </html>
+        `);
+      }
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Error Upload</title>
+          <script>
+            alert("Terjadi kesalahan saat mengupload file.");
+            window.location.href = "/";
+          </script>
+        </head>
+        <body></body>
+        </html>
+      `);
+    } else if (err) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Error Upload</title>
+          <script>
+            alert("Terjadi kesalahan saat mengupload file.");
+            window.location.href = "/";
+          </script>
+        </head>
+        <body></body>
+        </html>
+      `);
+    }
+    
+    if (!req.file) {
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="id">
+        <head>
+          <meta charset="UTF-8">
+          <title>Error Upload</title>
+          <script>
+            alert("File tidak ada.");
+            window.location.href = "/";
+          </script>
+        </head>
+        <body></body>
+        </html>
+      `);
+    }
+    
+    const fileUrl = `${req.protocol}://${req.get('host')}/file/${req.file.filename}`;
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="id">
+      <head>
+        <meta charset="UTF-8">
+        <title>Upload Sukses</title>
+        <script type='text/javascript' src='//pl25941223.effectiveratecpm.com/10/27/80/1027803ebe16fdba035d90382ec85fc1.js'></script>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+          }
+          .container {
+            background-color: #fff;
+            max-width: 600px;
+            width: 100%;
+            margin: 20px;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+          }
+          h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+          }
+          p {
+            margin-bottom: 20px;
+            color: #555;
+            line-height: 1.6;
+          }
+          a {
+            color: #007BFF;
+            text-decoration: none;
+            font-weight: bold;
+          }
+          a:hover {
+            text-decoration: underline;
+          }
+          .file-link {
+            word-wrap: break-word;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Upload Sukses</h1>
+          <p>File berhasil diupload.</p>
+          <p class="file-link">
+            Link: <a href="${fileUrl}" target="_blank">${fileUrl}</a>
+          </p>
+          <p><a href="/">Kembali ke Uploader</a></p>
+        </div>
+      </body>
+      </html>
+    `);
+  });
 });
 
 function cpuAverage() {
