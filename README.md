@@ -29,7 +29,7 @@ KyoUploader/
 
 1. **Clone Repository**
    ```bash
-   git clone https://github.com/yourusername/KyoUploader.git
+   git clone https://github.com/YudhaUNSP/KyoUploader.git
    cd KyoUploader
    ```
 
