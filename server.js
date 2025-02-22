@@ -20,8 +20,10 @@ const storage = multer.diskStorage({
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    const randomName = crypto.randomBytes(16).toString('hex') + ext;
-    cb(null, randomName);
+    const baseName = path.basename(file.originalname, ext).replace(/\s+/g, '_');
+    const randomNum = ('000' + Math.floor(Math.random() * 1000)).slice(-3);
+    const newName = `${baseName}-${randomNum}${ext}`;
+    cb(null, newName);
   }
 });
 const upload = multer({ storage });
